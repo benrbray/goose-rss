@@ -5,13 +5,20 @@ pub mod commands {
   pub mod feeds;
 }
 
+pub mod error;
+
+pub mod models {
+  pub mod fetch;
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   // tauri_specta builder
   let builder = Builder::<tauri::Wry>::new()
     .commands(collect_commands![
       commands::feeds::my_custom_command,
-      commands::feeds::greet
+      commands::feeds::greet,
+      commands::feeds::read_feed
     ]);
 
   // export typescript bindings (non-release builds only)

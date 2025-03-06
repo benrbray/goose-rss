@@ -65,8 +65,13 @@ export const Feeds = () => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        const result = await commands.greet(linkToCreate());
-        setResultText(result);
+        const result = await commands.readFeed({ url: linkToCreate() });
+        
+        if(result.status === "ok") {
+          setResultText(result.data);
+        } else {
+          setResultText(result.error);
+        }
       }}
     >
       <input

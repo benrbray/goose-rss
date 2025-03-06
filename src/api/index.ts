@@ -10,6 +10,14 @@ async myCustomCommand() : Promise<void> {
 },
 async greet(name: string) : Promise<string> {
     return await TAURI_INVOKE("greet", { name });
+},
+async readFeed(data: FeedToRead) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("read_feed", { data }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -23,7 +31,7 @@ async greet(name: string) : Promise<string> {
 
 /** user-defined types **/
 
-
+export type FeedToRead = { url: string }
 
 /** tauri-specta globals **/
 
