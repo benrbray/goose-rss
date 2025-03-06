@@ -1,16 +1,16 @@
 import { createSignal } from "solid-js";
+
 import logo from "./assets/logo.svg";
-import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
-function App() {
+// goose
+import * as feedApi from "./api/feeds";
+
+////////////////////////////////////////////////////////////////////////////////
+
+function AppDefault() {
   const [greetMsg, setGreetMsg] = createSignal("");
   const [name, setName] = createSignal("");
-
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name: name() }));
-  }
 
   return (
     <main class="container">
@@ -33,7 +33,7 @@ function App() {
         class="row"
         onSubmit={(e) => {
           e.preventDefault();
-          greet();
+          feedApi.greet(name());
         }}
       >
         <input
@@ -48,4 +48,43 @@ function App() {
   );
 }
 
-export default App;
+export const Feeds = () => {
+
+  const [linkToCreate, setLinkToCreate] = createSignal("");
+  const [resultText, setResultText] = createSignal("");
+
+  const createFeed = async () => {
+    // await feedApi.createFeed({ title: "auto", link: linkToCreate(), fetch_old_items: fetchOldItems() });
+    // setFeeds(await feedApi.readAllFeeds());
+    // setLinkToCreate("");
+  };
+  
+  return (<>
+  <h1>Create Feed</h1>
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        const result = await feedApi.greet(linkToCreate());
+        setResultText(result);
+      }}
+    >
+      <input
+        class="input-url"
+        type="text" placeholder="Feed URL"
+        value={linkToCreate()}
+        onInput={(e) => {setLinkToCreate(e.currentTarget.value)}}
+      />
+      <button type="submit">Subscribe</button>
+    </form>
+    <div>
+      {resultText()}
+    </div>
+  </>);
+}
+
+export const App = () => {
+  return (<main>
+    <Feeds />
+  </main>);
+}
