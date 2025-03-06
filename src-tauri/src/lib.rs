@@ -1,3 +1,6 @@
+use std::path::PathBuf;
+
+use tauri::Manager;
 use tauri_specta::{collect_commands, Builder};
 use specta_typescript::Typescript;
 
@@ -8,6 +11,8 @@ pub mod commands {
 pub mod error;
 
 pub mod models {
+  pub mod database;
+  pub mod feeds;
   pub mod fetch;
 }
 
@@ -33,6 +38,14 @@ pub fn run() {
     .setup(move |app| {
       // mount events defined by tauri_specta onto tauri app
       builder.mount_events(app);
+
+      // app data directory
+      let app_data_dir = if cfg!(dev) {
+        PathBuf::from("data")
+      } else {
+        app.handle().path().app_data_dir().unwrap()
+      };
+
       Ok(())
     })
     .run(tauri::generate_context!())

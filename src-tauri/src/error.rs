@@ -29,17 +29,17 @@ pub enum Error {
   // #[error("unknown")]
   // Unknown,
 
-  // #[error(transparent)]
-  // RusqliteError {
-  //     #[from]
-  //     source: rusqlite::Error,
-  // },
+  #[error(transparent)]
+  RusqliteError {
+      #[from]
+      source: rusqlite::Error,
+  },
 
-  // #[error(transparent)]
-  // SeaQueryError {
-  //     #[from]
-  //     source: sea_query::error::Error,
-  // },
+  #[error(transparent)]
+  SeaQueryError {
+      #[from]
+      source: sea_query::error::Error,
+  },
 
   #[error(transparent)]
   ReqwestError {
