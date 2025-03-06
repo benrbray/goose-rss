@@ -4,7 +4,7 @@ import logo from "./assets/logo.svg";
 import "./App.css";
 
 // goose
-import * as feedApi from "./api/feeds";
+import { commands, /*events*/ } from "./api";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ function AppDefault() {
         class="row"
         onSubmit={(e) => {
           e.preventDefault();
-          feedApi.greet(name());
+          commands.greet(name());
         }}
       >
         <input
@@ -65,7 +65,7 @@ export const Feeds = () => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        const result = await feedApi.greet(linkToCreate());
+        const result = await commands.greet(linkToCreate());
         setResultText(result);
       }}
     >
