@@ -1,5 +1,6 @@
-use std::path::PathBuf;
+use std::{fs, path::PathBuf, sync::Mutex};
 
+use rusqlite::Connection;
 use tauri::Manager;
 use tauri_specta::{collect_commands, Builder};
 use specta_typescript::Typescript;
@@ -8,12 +9,20 @@ pub mod commands {
   pub mod feeds;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 pub mod error;
 
 pub mod models {
   pub mod database;
   pub mod feeds;
   pub mod fetch;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+pub struct DbState {
+  db: Mutex<Connection>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -45,6 +54,16 @@ pub fn run() {
       } else {
         app.handle().path().app_data_dir().unwrap()
       };
+
+      // create app data directory
+      fs::create_dir_all(&app_data_dir).unwrap();
+      let db = models::database::open_connection(&app_data_dir).unwrap();
+      let _ = models::database::migrate(&db);
+
+      app.manage(DbState { db: Mutex::new(db) });
+
+      // TODO: worker for polling RSS
+      // worker::start(app, &app_data_dir);
 
       Ok(())
     })

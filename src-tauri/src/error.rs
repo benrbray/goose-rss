@@ -5,8 +5,8 @@ pub enum Error {
   // #[error("invalid value `{0}`")]
   // InvalidValue(String),
 
-  // #[error("invalid key `{0}` for `{1}`")]
-  // InvalidEnumKey(String, String),
+  #[error("invalid key `{0}` for `{1}`")]
+  InvalidEnumKey(String, String),
 
   #[error("invalid feed link `{0}`")]
   InvalidFeedLink(String),
