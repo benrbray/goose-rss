@@ -1,17 +1,20 @@
 use std::{fs, path::PathBuf, sync::Mutex};
 
-use rusqlite::Connection;
 use tauri::Manager;
 use tauri_specta::{collect_commands, Builder};
 use specta_typescript::Typescript;
+
+use diesel::prelude::*;
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+pub mod error;
 
 pub mod commands {
   pub mod feeds;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-pub mod error;
 
 pub mod models {
   pub mod database;
@@ -19,10 +22,12 @@ pub mod models {
   pub mod fetch;
 }
 
+pub mod schema;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 pub struct DbState {
-  db: Mutex<Connection>,
+  db: Mutex<SqliteConnection>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -32,7 +37,9 @@ pub fn run() {
     .commands(collect_commands![
       commands::feeds::my_custom_command,
       commands::feeds::greet,
-      commands::feeds::read_feed
+      commands::feeds::read_feed_title,
+      commands::feeds::create_feed,
+      commands::feeds::read_all_feeds,
     ]);
 
   // export typescript bindings (non-release builds only)
@@ -57,12 +64,15 @@ pub fn run() {
 
       // create app data directory
       fs::create_dir_all(&app_data_dir).unwrap();
-      let db = models::database::open_connection(&app_data_dir).unwrap();
-      let _ = models::database::migrate(&db);
 
+      // open the database connection, applying any pending migrations
+      let mut db = models::database::open_connection(&app_data_dir);
+      models::database::run_migrations(&mut db).expect("error running db migrations");
+      
+      // store the database connection in tauri app state
       app.manage(DbState { db: Mutex::new(db) });
 
-      // TODO: worker for polling RSS
+      // start worker for periodically polling RSS feeds
       // worker::start(app, &app_data_dir);
 
       Ok(())

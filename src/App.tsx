@@ -65,7 +65,7 @@ export const Feeds = () => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        const result = await commands.readFeed({ url: linkToCreate() });
+        const result = await commands.readFeedTitle({ url: linkToCreate() });
         
         if(result.status === "ok") {
           setResultText(result.data);
@@ -83,6 +83,7 @@ export const Feeds = () => {
       <button type="submit">Subscribe</button>
     </form>
     <div>
+      <h2>Feed Preview</h2>
       {resultText()}
     </div>
   </>);

@@ -11,9 +11,25 @@ async myCustomCommand() : Promise<void> {
 async greet(name: string) : Promise<string> {
     return await TAURI_INVOKE("greet", { name });
 },
-async readFeed(data: FeedToRead) : Promise<Result<string, string>> {
+async readFeedTitle(data: FeedInfo) : Promise<Result<string, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("read_feed", { data }) };
+    return { status: "ok", data: await TAURI_INVOKE("read_feed_title", { data }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async createFeed(data: CreateFeed) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("create_feed", { data }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async readAllFeeds() : Promise<Result<Feed[], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("read_all_feeds") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -31,7 +47,10 @@ async readFeed(data: FeedToRead) : Promise<Result<string, string>> {
 
 /** user-defined types **/
 
-export type FeedToRead = { url: string }
+export type CreateFeed = { title: string; url: string; fetch_old_items: boolean }
+export type Feed = { id: number; title: string; url: string; status: FeedStatus; checked_at: string; fetch_old_items: boolean }
+export type FeedInfo = { url: string }
+export type FeedStatus = "Subscribed" | "Unsubscribed"
 
 /** tauri-specta globals **/
 

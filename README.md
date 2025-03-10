@@ -8,3 +8,15 @@ A desktop RSS/Atom feed reader built with Rust + Tauri.  The initial implementat
 
 * upgrade from `tauri@1` to `tauri@2`
 * use `tauri-specta` to generate TypeScript bindings for Tauri commands
+
+# Development
+
+## Modifying the Database Schema
+
+The SQLite database schema is declared in `src/schema.rs`.  After modifying the schema, use the Diesel CLI to generate the `up.sql` and `down.sql` migration files:
+
+```bash
+diesel migration generate --diff-schema <YOUR_MIGRATION_NAME_HERE>
+```
+
+We use [`diesel`]
