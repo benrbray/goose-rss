@@ -11,7 +11,7 @@ async myCustomCommand() : Promise<void> {
 async greet(name: string) : Promise<string> {
     return await TAURI_INVOKE("greet", { name });
 },
-async readFeedTitle(data: FeedInfo) : Promise<Result<string, string>> {
+async readFeedTitle(data: FeedInfo) : Promise<Result<FeedPreview, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("read_feed_title", { data }) };
 } catch (e) {
@@ -48,8 +48,10 @@ async readAllFeeds() : Promise<Result<Feed[], string>> {
 /** user-defined types **/
 
 export type CreateFeed = { title: string; url: string; fetch_old_items: boolean }
+export type EntryPreview = { title: string; url: string; published: string | null }
 export type Feed = { id: number; title: string; url: string; status: FeedStatus; checked_at: string; fetch_old_items: boolean }
 export type FeedInfo = { url: string }
+export type FeedPreview = { title: string; entries: EntryPreview[] }
 export type FeedStatus = "Subscribed" | "Unsubscribed"
 
 /** tauri-specta globals **/

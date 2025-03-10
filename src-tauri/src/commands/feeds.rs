@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use tauri::State;
 use diesel::prelude::*;
@@ -33,9 +33,24 @@ pub struct FeedInfo {
   pub url: String
 }
 
+#[derive(specta::Type)]
+#[derive(Serialize)]
+pub struct EntryPreview {
+  pub title: String,
+  pub url: String,
+  pub published: Option<String>
+}
+
+#[derive(specta::Type)]
+#[derive(Serialize)]
+pub struct FeedPreview {
+  pub title: String,
+  pub entries: Vec<EntryPreview>
+}
+
 #[tauri::command]
 #[specta::specta]
-pub fn read_feed_title(data: FeedInfo) -> Result<String, String> {
+pub fn read_feed_title(data: FeedInfo) -> Result<FeedPreview, String> {
   // validate url
   if data.url.is_empty() {
     return Err(Error::EmptyString.to_string())
@@ -53,12 +68,24 @@ pub fn read_feed_title(data: FeedInfo) -> Result<String, String> {
       return Err(Error::InvalidFeedLink(data.url).to_string());
     }
     Ok(feed) => {
-      let title = match feed {
-        syndication::Feed::Atom(atom) => { atom.title().to_string() }
-        syndication::Feed::RSS(rss) =>   { rss.title().to_string()  }
+      let result = match feed {
+        syndication::Feed::Atom(atom) => FeedPreview {
+          title: atom.title().to_string(),
+          entries: atom.entries().to_vec().iter().map(|entry| {
+            EntryPreview {
+              title: entry.title().to_string(),
+              url: entry.id().to_string(),
+              published: entry.published().map(|p| p.to_string())
+            }
+          }).collect()
+        },
+        syndication::Feed::RSS(rss) => FeedPreview {
+          title: rss.title().to_string(),
+          entries: vec![]
+        }
       };
 
-      return Ok(title);
+      return Ok(result);
     }
   }
 }

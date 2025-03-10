@@ -1,10 +1,10 @@
-import { createSignal } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 
 import logo from "./assets/logo.svg";
 import "./App.css";
 
 // goose
-import { commands, /*events*/ } from "./api";
+import * as Api from "./api";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ function AppDefault() {
         class="row"
         onSubmit={(e) => {
           e.preventDefault();
-          commands.greet(name());
+          Api.commands.greet(name());
         }}
       >
         <input
@@ -48,10 +48,23 @@ function AppDefault() {
   );
 }
 
+export const FeedPreview = (props: { preview : Api.FeedPreview}) => {
+  return <div class="feed-preview">
+    <div>{props.preview.title}</div>
+    <div>
+      <For each={props.preview.entries}>
+        {(entry) => {
+          return (<div>{entry.title}</div>);
+        }}
+      </For>
+    </div>
+  </div>
+}
+
 export const Feeds = () => {
 
   const [linkToCreate, setLinkToCreate] = createSignal("");
-  const [resultText, setResultText] = createSignal("");
+  const [feedPreview, setFeedPreview] = createSignal<Api.FeedPreview|null>(null);
 
   const createFeed = async () => {
     // await feedApi.createFeed({ title: "auto", link: linkToCreate(), fetch_old_items: fetchOldItems() });
@@ -65,12 +78,12 @@ export const Feeds = () => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        const result = await commands.readFeedTitle({ url: linkToCreate() });
+        const result = await Api.commands.readFeedTitle({ url: linkToCreate() });
         
         if(result.status === "ok") {
-          setResultText(result.data);
+          setFeedPreview(result.data);
         } else {
-          setResultText(result.error);
+          setFeedPreview(null);
         }
       }}
     >
@@ -84,7 +97,9 @@ export const Feeds = () => {
     </form>
     <div>
       <h2>Feed Preview</h2>
-      {resultText()}
+      <Show when={feedPreview() !== null}>
+        <FeedPreview preview={feedPreview()!} />
+      </Show>
     </div>
   </>);
 }
