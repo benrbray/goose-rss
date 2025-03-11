@@ -4,8 +4,8 @@
 
 :root {
   font-family: system-ui;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 1.0rem;
+  line-height: 1.2em;
   font-weight: 400;
 
   color: #0f0f0f;
@@ -20,16 +20,37 @@
 
 body {
   margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
-/* .container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-} */
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  grid-template-areas:
+    "navigation content";
+
+  width: 100%;
+  height: 100%;
+}
+
+.container .navigation {
+  grid-area: navigation;
+  background-color: #f0f0f0;
+  border-right: 1px solid rgb(212, 212, 212);
+}
+
+.container .content {
+  grid-area: content;
+}
 
 a {
   font-weight: 600;

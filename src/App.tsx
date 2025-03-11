@@ -1,14 +1,29 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, ParentProps, Show } from "solid-js";
+import { Router, Route } from "@solidjs/router"
 
 import "./App.css";
 
 // goose
 import { Api } from "./api";
 import { FeedPreview } from "./components/FeedPreview/FeedPreview";
+import { Navigation } from "./components/Navigation/Navigation";
+import { ManageFeeds } from "./components/ManageFeeds/ManageFeeds";
 
 ////////////////////////////////////////////////////////////////////////////////
 
-export const Feeds = () => {
+export const Content = (props: ParentProps) => {
+  return <div class="content">
+    {props.children}
+  </div>
+}
+
+export const FrontPage = () => {
+  return <div>
+    Front Page
+  </div>
+}
+
+export const CreateFeed = () => {
 
   const [linkToCreate, setLinkToCreate] = createSignal("");
   const [feedPreview, setFeedPreview] = createSignal<Api.FeedPreview|null>(null);
@@ -19,7 +34,7 @@ export const Feeds = () => {
     // setLinkToCreate("");
   };
   
-  return (<>
+  return (<div class="feed-create">
   <h1>Create Feed</h1>
     <form
       onSubmit={async (e) => {
@@ -48,11 +63,16 @@ export const Feeds = () => {
         <FeedPreview preview={feedPreview()!} />
       </Show>
     </div>
-  </>);
+  </div>);
 }
 
-export const App = () => {
-  return (<main>
-    <Feeds />
-  </main>);
+export const App = (props: ParentProps) => {
+  // content is determined by a SolidJS Router,
+  // passed in through the children prop
+  return (<div class="container">
+    <Navigation />
+    <Content>
+      {props.children}
+    </Content>
+  </div>);
 }

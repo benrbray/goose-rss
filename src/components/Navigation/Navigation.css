@@ -1,0 +1,25 @@
+.navigation {
+  display: flex;
+  width: 100%;
+}
+
+.navigation .top {
+  width: 100%;
+}
+
+.navigation .nav-button {
+  padding: 5px;
+}
+
+.navigation .nav-button:hover {
+  background-color: #dedede;
+}
+
+.navigation .nav-button a {
+  color: unset;
+  font-weight: unset;
+}
+
+.navigation .nav-button a.active {
+  font-weight: bold;
+}
