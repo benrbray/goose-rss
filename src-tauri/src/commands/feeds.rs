@@ -1,7 +1,9 @@
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
-
 use tauri::State;
 use diesel::prelude::*;
+use diligent_date_parser::parse_date;
+use diligent_date_parser::chrono::offset::FixedOffset;
 
 use crate::error::Error;
 use crate::models::feeds::{CreateFeed, Feed};
@@ -36,9 +38,10 @@ pub struct FeedInfo {
 #[derive(specta::Type)]
 #[derive(Serialize)]
 pub struct EntryPreview {
-  pub title: String,
-  pub url: String,
-  pub published: Option<String>
+  pub title: Option<String>,
+  pub url: Option<String>,
+  pub url_comments: Option<String>,
+  pub published: Option<DateTime<FixedOffset>>
 }
 
 #[derive(specta::Type)]
@@ -73,15 +76,27 @@ pub fn read_feed_title(data: FeedInfo) -> Result<FeedPreview, String> {
           title: atom.title().to_string(),
           entries: atom.entries().to_vec().iter().map(|entry| {
             EntryPreview {
-              title: entry.title().to_string(),
-              url: entry.id().to_string(),
-              published: entry.published().map(|p| p.to_string())
+              title: Some(entry.title().to_string()),
+              url: Some(entry.id().to_string()),
+              url_comments: None,
+              // TODO: if no published date, use updated date
+              // see https://dicioccio.fr/atom.xml
+              published: entry.published().and_then(parse_date)
             }
           }).collect()
         },
         syndication::Feed::RSS(rss) => FeedPreview {
           title: rss.title().to_string(),
-          entries: vec![]
+          entries: rss.items().to_vec().iter().map(|item| {
+            EntryPreview {
+              title: item.title().map(|t| t.to_string()),
+              // TODO: guid
+              // TODO: <comments> as in https://lobste.rs/rss
+              url: item.link().map(|t| t.to_string()),
+              url_comments: item.comments().map(|t| t.to_string()),
+              published: item.pub_date().and_then(parse_date)
+            }
+          }).collect()
         }
       };
 

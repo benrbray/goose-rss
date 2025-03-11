@@ -14,11 +14,15 @@
       {
         "title": "goose-rss",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "maxWidth": 1200,
+        "maxHeight": 1200
       }
     ],
     "security": {
-      "csp": null
+      "csp": {
+        "default": ["'none'"]
+      }
     }
   },
   "bundle": {

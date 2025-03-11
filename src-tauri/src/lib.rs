@@ -45,7 +45,7 @@ pub fn run() {
   // export typescript bindings (non-release builds only)
   #[cfg(debug_assertions)]
   builder
-    .export(Typescript::default(), "../src/api/index.ts")
+    .export(Typescript::default(), "../src/api/api.ts")
     .expect("Failed to export typescript bindings");
 
   tauri::Builder::default()

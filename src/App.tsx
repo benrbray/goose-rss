@@ -1,65 +1,12 @@
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
-import logo from "./assets/logo.svg";
 import "./App.css";
 
 // goose
-import * as Api from "./api";
+import { Api } from "./api";
+import { FeedPreview } from "./components/FeedPreview/FeedPreview";
 
 ////////////////////////////////////////////////////////////////////////////////
-
-function AppDefault() {
-  const [greetMsg, setGreetMsg] = createSignal("");
-  const [name, setName] = createSignal("");
-
-  return (
-    <main class="container">
-      <h1>Welcome to Tauri + Solid</h1>
-
-      <div class="row">
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://solidjs.com" target="_blank">
-          <img src={logo} class="logo solid" alt="Solid logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and Solid logos to learn more.</p>
-
-      <form
-        class="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          Api.commands.greet(name());
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg()}</p>
-    </main>
-  );
-}
-
-export const FeedPreview = (props: { preview : Api.FeedPreview}) => {
-  return <div class="feed-preview">
-    <div>{props.preview.title}</div>
-    <div>
-      <For each={props.preview.entries}>
-        {(entry) => {
-          return (<div>{entry.title}</div>);
-        }}
-      </For>
-    </div>
-  </div>
-}
 
 export const Feeds = () => {
 
