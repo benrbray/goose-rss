@@ -29,6 +29,7 @@ export const CreateFeed = () => {
 
   const [feedPreview, setFeedPreview] = createResource(debouncedUrl, async (url: string) => {
     console.log(`url: ${url}`);
+
     const result = await Api.commands.readFeedTitle({ url });
     if(result.status === "ok") {
       return result.data;
@@ -101,9 +102,9 @@ export const CreateFeed = () => {
     </div>
     <div>
       <h2>Feed Preview</h2>
-      <Show when={feedPreview()}>
+      {/* <Show when={feedPreview()}>
         <FeedPreview preview={feedPreview()!} />
-      </Show>
+      </Show> */}
     </div>
   </div>);
 }

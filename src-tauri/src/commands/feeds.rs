@@ -53,14 +53,14 @@ pub struct FeedPreview {
 
 #[tauri::command]
 #[specta::specta]
-pub fn read_feed_title(data: FeedInfo) -> Result<FeedPreview, String> {
+pub async fn read_feed_title(data: FeedInfo) -> Result<FeedPreview, String> {
   // validate url
   if data.url.is_empty() {
     return Err(Error::EmptyString.to_string())
   }
 
   // fetch feed contents
-  let html_content = fetch_content(&data.url).unwrap_or_else(|e| {
+  let html_content = fetch_content(&data.url).await.unwrap_or_else(|e| {
     e.to_string()
   });
 
