@@ -1,4 +1,4 @@
-use chrono::DateTime;
+use chrono::{DateTime, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use tauri::State;
 use diesel::prelude::*;
@@ -6,7 +6,7 @@ use diligent_date_parser::parse_date;
 use diligent_date_parser::chrono::offset::FixedOffset;
 
 use crate::error::Error;
-use crate::models::feeds::{CreateFeed, Feed};
+use crate::models::feeds::{CreateFeed, Feed, FeedStatus};
 use crate::models::fetch::fetch_content;
 use crate::DbState;
 
@@ -107,13 +107,26 @@ pub fn read_feed_title(data: FeedInfo) -> Result<FeedPreview, String> {
 
 #[tauri::command]
 #[specta::specta]
-pub fn create_feed(db_state: State<DbState>, data: CreateFeed) -> Result<String, String> {
+pub fn create_feed(
+  db_state: State<DbState>,
+  title: String,
+  url: String,
+  fetch_old_items: bool,
+) -> Result<String, String> {
   use crate::schema::feeds;
+
+  println!("create_feed");
 
   let mut db = db_state.db.lock().unwrap();
 
   let result = diesel::insert_into(feeds::table)
-    .values(&data)
+    .values(CreateFeed {
+      title,
+      url,
+      fetch_old_items,
+      status: FeedStatus::Subscribed,
+      checked_at: NaiveDateTime::MIN,
+    })
     .returning(Feed::as_returning())
     .get_result(&mut *db);
 

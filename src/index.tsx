@@ -1,8 +1,9 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
-import { App, CreateFeed, FrontPage } from "./App";
+import { App, FrontPage } from "./App";
 import { Route, Router } from "@solidjs/router";
 import { ManageFeeds } from "./components/ManageFeeds/ManageFeeds";
+import { CreateFeed } from "./components/CreateFeed/CreateFeed";
 
 render(
   () => (<Router root={App}>

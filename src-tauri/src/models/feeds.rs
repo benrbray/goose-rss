@@ -9,7 +9,7 @@ use diesel::{deserialize::{FromSql, FromSqlRow}, expression::AsExpression, prelu
 // The article below explains the traits needed for using enums with diesel:
 // https://www.matsimitsu.com/blog/2024-06-23-rust-enums-in-sqlite-with-diesel
 
-#[derive(Serialize, specta::Type)]
+#[derive(Serialize, Deserialize, specta::Type)]
 #[derive(Debug, EnumStringify, FromSqlRow, AsExpression)]
 #[diesel(sql_type = Text)]
 pub enum FeedStatus {
@@ -53,4 +53,17 @@ pub struct CreateFeed {
   pub title: String,
   pub url: String,
   pub fetch_old_items: bool,
+  pub checked_at: NaiveDateTime,
+  pub status: FeedStatus
+}
+
+#[derive(Deserialize, specta::Type)]
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::feeds)]
+pub struct FeedCreate {
+  pub title: String,
+  pub url: String,
+  pub fetch_old_items: bool,
+  pub checked_at: NaiveDateTime,
+  pub status: FeedStatus
 }

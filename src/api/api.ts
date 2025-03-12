@@ -19,9 +19,9 @@ async readFeedTitle(data: FeedInfo) : Promise<Result<FeedPreview, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async createFeed(data: CreateFeed) : Promise<Result<string, string>> {
+async createFeed(title: string, url: string, fetchOldItems: boolean) : Promise<Result<string, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("create_feed", { data }) };
+    return { status: "ok", data: await TAURI_INVOKE("create_feed", { title, url, fetchOldItems }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -47,7 +47,6 @@ async readAllFeeds() : Promise<Result<Feed[], string>> {
 
 /** user-defined types **/
 
-export type CreateFeed = { title: string; url: string; fetch_old_items: boolean }
 export type EntryPreview = { title: string | null; url: string | null; url_comments: string | null; published: string | null }
 export type Feed = { id: number; title: string; url: string; status: FeedStatus; checked_at: string; fetch_old_items: boolean }
 export type FeedInfo = { url: string }

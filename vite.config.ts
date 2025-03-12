@@ -1,12 +1,17 @@
-import { defineConfig } from "vite";
+import { defineConfig, UserConfig } from "vite";
 import solid from "vite-plugin-solid";
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig(async (): Promise<UserConfig> => ({
   plugins: [solid()],
+  css: {
+    modules: {
+      localsConvention: "camelCase"
+    }
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
@@ -28,5 +33,5 @@ export default defineConfig(async () => ({
       // 3. tell vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },
-  },
+  }
 }));
