@@ -12,6 +12,15 @@ use crate::DbState;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
+// Note:  Commands will run on the main thread by default, unless marked async.
+// The UI also runs on the main thread, so any blocking by commands in the main
+// thread will also block the UI.
+//
+// As a general rule, commands should probably be async by default, unless
+// there is a specific reason to run them on the main thread.
+//
+// See [this thread](https://github.com/tauri-apps/tauri/discussions/3561).
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
