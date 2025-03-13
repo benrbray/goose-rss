@@ -8,6 +8,7 @@ A desktop RSS/Atom feed reader built with Rust + Tauri.  The initial implementat
 
 * upgrade from `tauri@1` to `tauri@2`
 * use `tauri-specta` to generate TypeScript bindings for Tauri commands
+* UI performance improvements (mostly due to removal of blocking network requests)
 
 # Development
 

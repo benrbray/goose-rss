@@ -12,12 +12,7 @@ export const CreateFeed = () => {
   const [feedTitle, setFeedTitle] = createSignal("");
   const [fetchOld, setFetchOld] = createSignal(false);
   
-  // update feed preview when URL changes
-  // const [feedPreview, setFeedPreview] = createSignal<Api.FeedPreview|null>(null);
-
-  // const loadPreview = debounce(() => {
-  //   console.log(`url: ${feedUrl()}`)
-  // }, 500);
+  // update feed preview when URL changes, debounced
   const previewScheduled = createScheduled(fn => debounce(fn, 800));
 
   const debouncedUrl = createMemo((p: string = "") => {
@@ -102,9 +97,17 @@ export const CreateFeed = () => {
     </div>
     <div>
       <h2>Feed Preview</h2>
-      {/* <Show when={feedPreview()}>
-        <FeedPreview preview={feedPreview()!} />
-      </Show> */}
+      <Show when={feedPreview()}>
+          <FeedPreview
+            feedTitle={feedPreview()!.title}
+            entries={feedPreview()!.entries.map(e => ({
+              title: e.title,
+              published: e.published,
+              url: e.url,
+              url_comments: e.url_comments
+            }))}
+          />
+      </Show>
     </div>
   </div>);
 }

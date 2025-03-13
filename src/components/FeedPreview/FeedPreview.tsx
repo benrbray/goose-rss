@@ -15,11 +15,23 @@ export const dateFrom = (date: string|null): Temporal.ZonedDateTime | null => {
   }
 }
 
-export const FeedPreview = (props: { preview : Api.FeedPreview}) => {
+export namespace FeedPreview {
+  export type Props = {
+    feedTitle: string,
+    entries: {
+      title: string|null,
+      url: string|null,
+      url_comments: string|null,
+      published: string|null
+    }[]
+  }
+}
+
+export const FeedPreview = (props: FeedPreview.Props) => {
   return <div class="feed-preview">
-    <div>{props.preview.title}</div>
+    <div>{props.feedTitle}</div>
     <div>
-      <For each={props.preview.entries}>
+      <For each={props.entries}>
         {(entry) => {
           let datePublished = dateFrom(entry.published);
 

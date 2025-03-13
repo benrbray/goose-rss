@@ -60,6 +60,118 @@ pub struct FeedPreview {
   pub entries: Vec<EntryPreview>
 }
 
+#[derive(specta::Type)]
+#[derive(Serialize)]
+pub struct Entry {
+  // data parsed from the feed
+  pub title: Option<String>,
+  pub url: Option<String>,
+  pub url_comments: Option<String>,
+  pub published: Option<DateTime<FixedOffset>>,
+  pub author: Option<String>,
+  pub description: Option<String>,
+  // computed data
+  pub fingerprint: String,
+  pub feed: EntryFeed,
+  // user data
+  pub is_read: bool,
+  pub is_saved: bool,
+}
+
+#[derive(specta::Type)]
+#[derive(Serialize)]
+pub struct EntryFeed {
+  pub id: i32,
+  pub url: String,
+  pub title: String,
+}
+
+//// HELPERS ///////////////////////////////////////////////////////////////////
+
+pub async fn fetch_feed_entries(url: &str) -> Result<Vec<Entry>, String> {
+  // validate url
+  if url.is_empty() {
+    return Err(Error::EmptyString.to_string())
+  }
+
+  // fetch feed contents
+  // TODO: we shouldn't use unwrap_or_else here -- use ?
+  let html_content = fetch_content(url).await.unwrap_or_else(|e| {
+    e.to_string()
+  });
+
+  // TODO: if it's not a feed, attempt to recover gracefully by
+  // looking for feeds at <url>/atom.xml or <url>/rss.xml
+  match html_content.parse::<syndication::Feed>() {
+    Err(_) => {
+      return Err(Error::InvalidFeedLink(url.to_string()).to_string());
+    }
+    Ok(feed) => {
+      let result = match feed {
+        syndication::Feed::Atom(atom) => 
+          atom.entries().iter().map(|entry| {
+            Entry {
+              title: Some(entry.title().to_string()),
+              author: Some("author".to_string()),
+              // TODO: if no published date, use updated date
+              // see https://dicioccio.fr/atom.xml
+              published: entry.published().and_then(parse_date),
+              description: Some("description".to_string()),
+              url: Some(entry.id().to_string()),
+              url_comments: None,
+              fingerprint: "".to_string(),
+              is_read: false,
+              is_saved: false,
+              feed: EntryFeed {
+                id: 0,
+                url: url.to_string(),
+                title: atom.title().to_string()
+              }
+            }
+          }).collect::<Vec<Entry>>(),
+        syndication::Feed::RSS(rss) =>
+          rss.items().to_vec().iter().map(|item| {
+            Entry {
+              title: item.title().map(|s| s.to_string()),
+              author: Some("author".to_string()),
+              // TODO: if no published date, use updated date
+              // see https://dicioccio.fr/atom.xml
+              published: item.pub_date().and_then(parse_date),
+              description: Some("description".to_string()),
+              url: item.link().map(|t| t.to_string()),
+              url_comments: item.comments().map(|t| t.to_string()),
+              fingerprint: "".to_string(),
+              is_read: false,
+              is_saved: false,
+              feed: EntryFeed {
+                id: 0,
+                url: url.to_string(),
+                title: rss.title().to_string()
+              }
+            }
+          }).collect::<Vec<Entry>>(),
+          // FeedPreview {
+          //   title: rss.title().to_string(),
+          //   entries: rss.items().to_vec().iter().map(|item| {
+          //     EntryPreview {
+          //       title: item.title().map(|t| t.to_string()),
+          //       // TODO: guid
+          //       // TODO: <comments> as in https://lobste.rs/rss
+          //       url: item.link().map(|t| t.to_string()),
+          //       url_comments: item.comments().map(|t| t.to_string()),
+          //       published: item.pub_date().and_then(parse_date)
+          //     }
+          //   }).collect()
+          // }
+      };
+
+      return Ok(result);
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 #[tauri::command]
 #[specta::specta]
 pub async fn read_feed_title(data: FeedInfo) -> Result<FeedPreview, String> {
@@ -164,15 +276,27 @@ pub fn read_all_feeds(db_state: State<DbState>) -> Result<Vec<Feed>, String> {
   }
 }
 
-// #[tauri::command]
-// #[specta::specta]
-// pub fn read_feed(db_state: State<DbState>, id: i32) -> Result<Option<Feed>, String> {
-//     let db = db_state.db.lock().unwrap();
-//     match feeds::read(&db, id) {
-//         Ok(feed) => Ok(feed),
-//         Err(err) => Err(err.to_string()),
-//     }
-// }
+#[tauri::command]
+#[specta::specta]
+pub async fn read_feed_entries(db_state: State<'_, DbState>, feed_id: i32) -> Result<Vec<Entry>, String> {
+  use crate::schema::feeds::dsl::*;
+
+  // get feed information
+  let result_feed = {
+    let mut db = db_state.db.lock().unwrap();
+    feeds
+      .find(feed_id)
+      .select(Feed::as_select())
+      .first(&mut *db)
+      .map_err(|err| {
+        err.to_string()
+      })?
+  };
+
+  // get entries from feed
+  let entries = fetch_feed_entries(&result_feed.url).await?;
+  return Ok(entries);
+}
 
 // #[tauri::command]
 // #[specta::specta]

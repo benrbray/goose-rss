@@ -34,6 +34,14 @@ async readAllFeeds() : Promise<Result<Feed[], string>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async readFeedEntries(feedId: number) : Promise<Result<Entry[], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("read_feed_entries", { feedId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -47,6 +55,8 @@ async readAllFeeds() : Promise<Result<Feed[], string>> {
 
 /** user-defined types **/
 
+export type Entry = { title: string | null; url: string | null; url_comments: string | null; published: string | null; author: string | null; description: string | null; fingerprint: string; feed: EntryFeed; is_read: boolean; is_saved: boolean }
+export type EntryFeed = { id: number; url: string; title: string }
 export type EntryPreview = { title: string | null; url: string | null; url_comments: string | null; published: string | null }
 export type Feed = { id: number; title: string; url: string; status: FeedStatus; checked_at: string; fetch_old_items: boolean }
 export type FeedInfo = { url: string }

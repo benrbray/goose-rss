@@ -40,6 +40,7 @@ pub fn run() {
       commands::feeds::read_feed_title,
       commands::feeds::create_feed,
       commands::feeds::read_all_feeds,
+      commands::feeds::read_feed_entries
     ]);
 
   // export typescript bindings (non-release builds only)
